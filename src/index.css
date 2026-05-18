@@ -1,0 +1,22 @@
+:root {
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f5f5f5;
+  --color-background-tertiary: #eeeeee;
+
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #999999;
+
+  --color-border-secondary: #cccccc;
+  --color-border-tertiary: #dddddd;
+
+  --border-radius-md: 10px;
+  --border-radius-lg: 14px;
+  --border-radius-xl: 24px;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eeeeee;
+}

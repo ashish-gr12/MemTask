@@ -1,0 +1,48 @@
+# dependencies
+node_modules/
+
+# production build
+dist/
+
+# vite cache
+.vite/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Android / Capacitor
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# IDE files
+.vscode/
+.idea/
+
+# Firebase cache
+.firebase/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Firebase admin keys
+serviceAccountKey.json
+firebase-adminsdk*.json
+
+# Android signing keys
+*.jks
+*.keystore
+
+# Firebase logs
+firebase-debug.log
