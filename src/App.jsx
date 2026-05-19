@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Auth from "./Auth";
 import { auth } from "./firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import {
   saveShared,
   loadShared,
@@ -58,6 +59,8 @@ export default function App() {
   );
   const [tempGroup, setTempGroup] =
   useState("");
+  const [showInvite, setShowInvite] =
+  useState(false);
 
   useEffect(() => {
   (async () => {
@@ -165,12 +168,31 @@ export default function App() {
     setMembers([]); setCurrent(null); setStage("setup");
   };  
 
+  const leaveGroup = () => {
+
+  if (
+    !confirm(
+      "Leave current group?"
+    )
+  ) return;
+
+  localStorage.removeItem(
+    "groupId"
+  );
+
+  setGroupId("");
+
+  setMembers([]);
+
+  setCurrent(null);
+
+  };
+
   if (!user) {
     return <Auth onLogin={setUser} />;
   }
 
-if (!groupId) {
-
+if (!groupId || showInvite) {
   return (
 
     <div style={{
@@ -181,6 +203,34 @@ if (!groupId) {
     }}>
 
       <h2>Join Group</h2>
+      <button
+      style={{
+        marginBottom: 16
+      }}
+
+      onClick={async () => {
+
+        const newGroupId =
+           crypto.randomUUID()
+            .slice(0, 6)
+            .toUpperCase();
+
+        await ensureGroupExists(
+          newGroupId
+        );
+
+        localStorage.setItem(
+          "groupId",
+          newGroupId
+        );
+        
+        setShowInvite(true);
+
+
+      }}
+    >
+      Create Group
+    </button>
 
       <input
         placeholder="Enter Group Code"
@@ -206,12 +256,111 @@ if (!groupId) {
           cleaned
         );
 
-        window.location.reload();
-
+      setGroupId(cleaned);
+      
       }}
       >
         Join Group
       </button>
+
+      {showInvite && (
+
+  <div style={{
+    marginTop: 20,
+    padding: 16,
+    borderRadius: 12,
+    background: "#f3f3f3"
+  }}>
+
+    <p style={{
+      fontWeight: 600,
+      marginBottom: 8
+    }}>
+      Invite Code
+    </p>
+
+    <h2 style={{
+      letterSpacing: 2,
+      marginBottom: 16
+    }}>
+      {localStorage.getItem("groupId")}
+    </h2>
+
+    <div style={{
+      display: "flex",
+      gap: 10
+    }}>
+
+      <button
+        onClick={() => {
+
+          navigator.clipboard.writeText(
+            localStorage.getItem("groupId")
+          );
+
+          alert("Code copied!");
+
+        }}
+      >
+        Copy Code
+      </button>
+
+      <button
+        onClick={async () => {
+
+          const code =
+            localStorage.getItem("groupId");
+
+          if (navigator.share) {
+
+            await navigator.share({
+
+              title: "Join My MemTask Group",
+
+              text:
+                `Join my MemTask group using code: ${code}`
+
+            });
+
+          } else {
+
+            alert(
+              "Sharing not supported on this device"
+            );
+
+          }
+
+        }}
+      >
+        Share
+      </button>
+
+    </div>
+
+    <button
+
+      style={{
+        marginTop: 16,
+        width: "100%"
+      }}
+
+      onClick={() => {
+
+        setShowInvite(false);
+
+        setGroupId(
+          localStorage.getItem("groupId")
+        );
+
+      }}
+
+    >
+      Continue
+    </button>
+
+  </div>
+
+)}
 
     </div>
 
@@ -247,13 +396,52 @@ if (!groupId) {
             <span style={{ fontSize: 13, fontWeight: 500 }}>{currentMember?.name}</span>
             <i className="ti ti-chevron-down" style={{ fontSize: 12, opacity: 0.6 }} />
           </button>
-          <button style={styles.iconBtn} onClick={resetAll} title="Reset all">
-            <i className="ti ti-settings" style={{ fontSize: 17 }} />
+
+          <button
+
+          style={styles.iconBtn}
+
+          onClick={leaveGroup}
+
+          title="Leave Group"
+
+        >
+
+          <i
+            className="ti ti-users-minus"
+            style={{ fontSize: 17 }}
+          />
+
+        </button>
+
+          <button
+
+            style={styles.iconBtn}
+
+            onClick={async () => {
+
+              localStorage.removeItem(
+                "groupId"
+              );
+
+              await signOut(auth);
+
+            }}
+
+            title="Logout"
+          >
+
+            <i
+              className="ti ti-logout"
+              style={{ fontSize: 17 }}
+            />
+
           </button>
+
         </div>
       </div>
       <div style={styles.content}>
-        {tab === "tasks"    && <Tasks    memberId={currentMember.id} members={members} />}
+        {tab === "tasks"    && <Tasks    memberId={currentMember?.id} members={members} />}
 
         {tab === "plans" && (
           <Plans
@@ -265,7 +453,7 @@ if (!groupId) {
         {tab === "water" && (
           <Water
             members={members}
-            currentMemberId={currentMember.id}
+            currentMemberId={currentMember?.id}
             groupId={groupId}
           />
         )}
@@ -273,7 +461,7 @@ if (!groupId) {
         {tab === "expenses" && (
           <Expenses
             members={members}
-            currentMemberId={currentMember.id}
+            currentMemberId={currentMember?.id}
             groupId={groupId}
           />
         )}
