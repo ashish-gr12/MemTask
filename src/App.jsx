@@ -61,6 +61,8 @@ export default function App() {
   useState("");
   const [showInvite, setShowInvite] =
   useState(false);
+  const [showSettings, setShowSettings] =
+  useState(false);
 
   useEffect(() => {
   (async () => {
@@ -385,6 +387,7 @@ if (!groupId || showInvite) {
   const mi = members.findIndex(m => m.id === currentMember?.id);
 
   return (
+    <>
     <div style={styles.shell}>
       <div style={styles.topBar}>
         <span style={styles.appName}>MemTask</span>
@@ -399,40 +402,17 @@ if (!groupId || showInvite) {
 
           <button
 
-          style={styles.iconBtn}
-
-          onClick={leaveGroup}
-
-          title="Leave Group"
-
-        >
-
-          <i
-            className="ti ti-users-minus"
-            style={{ fontSize: 17 }}
-          />
-
-        </button>
-
-          <button
-
             style={styles.iconBtn}
 
-            onClick={async () => {
+            onClick={() =>
+              setShowSettings(true)
+            }
 
-              localStorage.removeItem(
-                "groupId"
-              );
-
-              await signOut(auth);
-
-            }}
-
-            title="Logout"
+            title="Group Settings"
           >
 
             <i
-              className="ti ti-logout"
+              className="ti ti-settings"
               style={{ fontSize: 17 }}
             />
 
@@ -475,6 +455,186 @@ if (!groupId || showInvite) {
         ))}
       </nav>
     </div>
+
+    {showSettings && (
+
+    <Modal
+      title="Group Settings"
+      onClose={() =>
+        setShowSettings(false)
+      }
+    >
+
+      <div style={styles.card}>
+
+        <p style={{
+          margin: 0,
+          fontSize: 12,
+          opacity: 0.7
+        }}>
+          GROUP CODE
+        </p>
+
+        <h2 style={{
+          margin: "6px 0 0",
+          letterSpacing: 2
+        }}>
+          {groupId}
+        </h2>
+
+      </div>
+      
+      <p style={styles.sectionLabel}>
+        Members :
+      </p>
+      <p>Members:</p>
+
+        {members.map((m,i) => (
+
+      <div
+        key={m.id}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          marginBottom: 10
+        }}
+      >
+
+        <div style={{
+          width: 32,
+          height: 32,
+          borderRadius: "50%",
+          background: avatarColor(i),
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+          fontWeight: 700
+        }}>
+
+        {m?.name?.[0]?.toUpperCase() || "?"}
+        
+        </div>
+
+        <span>
+          {m.name}
+        </span>
+
+      </div>
+        ))}
+
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 10,
+          marginTop: 16
+        }}>
+
+        <button
+
+          onClick={() => {
+
+            navigator.clipboard.writeText(
+              groupId
+            );
+
+            alert("Code copied!");
+
+          }}
+
+
+          style={{
+            ...styles.primaryBtn,
+            width: "100%",
+            background: "#7F77DD"
+          }}
+
+        >
+
+          Copy Invite Code
+
+        </button>
+
+
+        <button
+
+            onClick={async () => {
+
+              if (navigator.share) {
+
+                await navigator.share({
+
+                  title: "Join My MemTask Group",
+
+                  text:
+                    `Join my group using code: ${groupId}`
+
+                });
+
+              }
+
+            }}
+
+
+            style={{
+              ...styles.primaryBtn,
+              width: "100%",
+              background: "#378ADD"
+            }}
+
+          >
+
+          Share Invite
+
+        </button>
+
+        <button onClick={leaveGroup}
+                
+          style={{
+            ...styles.primaryBtn,
+            width: "100%",
+            background: "#D85A30"
+          }}
+        
+        >
+
+          Leave Group
+
+        </button>
+
+
+        <button
+
+          onClick={async () => {
+
+            localStorage.removeItem(
+              "groupId"
+            );
+
+            await signOut(auth);
+
+          }}
+
+
+          style={{
+            ...styles.primaryBtn,
+            width: "100%",
+            background: "#E24B4A"
+          }}
+
+        >
+
+          Logout
+
+        </button>
+        
+      </div>
+
+    </Modal>
+
+  )}
+  </>
   );
 }
 
@@ -1190,7 +1350,7 @@ function ExpenseForm({ members, currentMemberId, onSave }) {
       </select>
       <label style={styles.label}>Split between</label>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 12 }}>
-        {members.map(m => (
+        {members.map((m,i) => (
           <button key={m.id} style={{ ...styles.chip, ...(participants.includes(m.id) ? styles.chipActive : {}) }}
             onClick={() => toggle(m.id)}>{m.name}</button>
         ))}
